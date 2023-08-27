@@ -1,0 +1,27 @@
+##################################################################
+# Syntax Coloring Map For OPT4048 Ambient Light Sensor Library
+##################################################################
+
+##################################################################
+# Datatypes (KEYWORD1)
+##################################################################
+
+OPT4048	KEYWORD1
+
+##################################################################
+# Methods and Functions (KEYWORD2)
+##################################################################
+
+begin KEYWORD2
+readDeviceID KEYWORD2
+
+readResult KEYWORD2
+readHighLimit KEYWORD2
+writeHighLimit KEYWORD2
+readLowLimit KEYWORD2
+writeLowLimit KEYWORD2
+
+readConfigA KEYWORD2
+writeConfigA KEYWORD2
+readConfigB KEYWORD2
+writeConfigB KEYWORD2

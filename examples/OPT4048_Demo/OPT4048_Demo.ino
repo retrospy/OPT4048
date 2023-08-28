@@ -38,20 +38,18 @@ void setup()
 
 void loop()
 {
-   OPT4048_XYZ sensorData;
+   OPT4048_RGB sensorData;
   
-  OPT4048_ErrorCode err = opt4048.readXYZ(sensorData);
+  OPT4048_ErrorCode err = opt4048.readRGB(sensorData);
 
   if (err == NO_ERROR)
   {
-    Serial.print("X=");
-    Serial.print(sensorData.X);
-    Serial.print(" Y=");
-    Serial.print(sensorData.Y);
-    Serial.print(" Z=");
-    Serial.print(sensorData.Z);
-    Serial.print(" Lux=");
-    Serial.println(sensorData.Lux);
+    Serial.print("R=");
+    Serial.print((int)(sensorData.R * 255));
+    Serial.print(" G=");
+    Serial.print((int)(sensorData.G * 255));
+    Serial.print(" B=");
+    Serial.println((int)(sensorData.B * 255));
   }
   else
   {

@@ -251,6 +251,50 @@ OPT4048_ErrorCode OPT4048::readLux(float& lux)
 
 }
 
+OPT4048_ErrorCode OPT4048::readRGB(OPT4048_RGB& values)
+{
+	// M^-1 for sRGB @ D65 from www.brucelindbloom.com
+	float XYZ_to_RGB[3][3] = { {  3.2404542, -1.5371385, -0.4985314 },
+							   { -0.9692660,  1.8760108,  0.0415560 },
+							   {  0.0556434, -0.2040259,  1.0572252 }
+	};
+	OPT4048_XYZ xyz;
+	OPT4048_ErrorCode err = readXYZ(xyz);
+
+	if (err == NO_ERROR)
+	{
+		// XYZ of D65 Illuminant
+		xyz.X /= 95.0500;
+		xyz.Y /= 100.0000;
+		xyz.Z /= 108.9000;
+
+		values.R = xyz.X * XYZ_to_RGB[0][0] + xyz.Y * XYZ_to_RGB[0][1] + xyz.Z * XYZ_to_RGB[0][2];
+		values.G = xyz.X * XYZ_to_RGB[1][0] + xyz.Y * XYZ_to_RGB[1][1] + xyz.Z * XYZ_to_RGB[1][2];
+		values.B = xyz.X * XYZ_to_RGB[2][0] + xyz.Y * XYZ_to_RGB[2][1] + xyz.Z * XYZ_to_RGB[2][2];
+
+		// sRGB Companding function from www.brucelindbloom.com
+		if (values.R <= 0.0031308)
+			values.R *= 12.92;
+		else
+			values.R = pow(1.055 * values.R, 1 / 2.4) - 0.055;
+
+		if (values.G <= 0.0031308)
+			values.G *= 12.92;
+		else
+			values.G = pow(1.055 * values.G, 1 / 2.4) - 0.055;
+
+		if (values.B <= 0.0031308)
+			values.B *= 12.92;
+		else
+			values.B = pow(1.055 * values.B, 1 / 2.4) - 0.055;
+
+		values.R = min(1.0, max(0.0, values.R));
+		values.G = min(1.0, max(0.0, values.G));
+		values.B = min(1.0, max(0.0, values.B));
+	}
+	return err;
+}
+
 OPT4048_ErrorCode OPT4048::readData(uint16_t* data)
 {
 	uint8_t	buf[2];

@@ -174,6 +174,13 @@ struct OPT4048_CIE
 	float Y;
 };
 
+struct OPT4048_RGB
+{
+	float R;
+	float G;
+	float B;
+};
+
 class OPT4048 {
 public:
 	OPT4048();
@@ -186,6 +193,7 @@ public:
 	OPT4048_ErrorCode readXYZ(OPT4048_XYZ& values);
 	OPT4048_ErrorCode readCIE(OPT4048_CIE& values);
 	OPT4048_ErrorCode readLux(float& lux);
+	OPT4048_ErrorCode readRGB(OPT4048_RGB& values);
 
 	OPT4048_RESULT readChannel(OPT4048_Channel channel);
 

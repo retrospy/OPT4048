@@ -40,7 +40,7 @@ void loop()
 {
    OPT4048_RGB sensorData;
   
-  OPT4048_ErrorCode err = opt4048.readRGB(sensorData);
+  OPT4048_ErrorCode err = GetSensorDataRGB(sensorData);
 
   if (err == NO_ERROR)
   {
@@ -55,6 +55,22 @@ void loop()
   {
     printError("OPT4048 data", err);
   }
+}
+
+OPT4048_ErrorCode GetSensorDataRGB(OPT4048_RGB& sensorData)
+{
+  OPT4048_RESULT channelData[4];
+
+  OPT4048_ErrorCode err = opt4048.readAllChannels(channelData);
+
+  if (err == NO_ERROR)
+  {
+     OPT4048_ADC adc = opt4048.ConvertRAWtoADC(channelData);  // Can use "OPT4048_ErrorCode readADC(OPT4048_ADC& values)" to get directly here
+     OPT4048_XYZ xyz = opt4048.ConvertADCtoXYZ(adc);          // Can use "OPT4048_ErrorCode readXYZ(OPT4048_XYZ& values)" to get directly here  
+     sensorData = opt4048.ConvertXYZtoRGB(xyz);               // Can use "OPT4048_ErrorCode readRGB(OPT4048_RGB& values)" to get directly here
+  }
+
+  return err;
 }
 
 void configureSensor() 

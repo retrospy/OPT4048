@@ -32,6 +32,9 @@ THE SOFTWARE.
 #define OPT4048_H
 
 #include <Arduino.h>
+#include <functional>
+
+using namespace std;
 
 enum OPT4048_Commands  
 {
@@ -181,6 +184,8 @@ struct OPT4048_RGB
 	float B;
 };
 
+
+
 class OPT4048 {
 public:
 	OPT4048();
@@ -189,13 +194,24 @@ public:
 
 	uint16_t readDeviceID();
 
+	OPT4048_RESULT readChannel(OPT4048_Channel channel);
+	OPT4048_ErrorCode readAllChannels(OPT4048_RESULT data[4]);
+
 	OPT4048_ErrorCode readADC(OPT4048_ADC& values);
 	OPT4048_ErrorCode readXYZ(OPT4048_XYZ& values);
 	OPT4048_ErrorCode readCIE(OPT4048_CIE& values);
 	OPT4048_ErrorCode readLux(float& lux);
 	OPT4048_ErrorCode readRGB(OPT4048_RGB& values);
 
-	OPT4048_RESULT readChannel(OPT4048_Channel channel);
+	float ConvertRAWtoADC(OPT4048_RESULT result);
+	OPT4048_ADC ConvertRAWtoADC(OPT4048_RESULT channels[4]);
+	OPT4048_XYZ ConvertADCtoXYZ(OPT4048_ADC adc);
+	OPT4048_CIE ConvertXYZtoCIE(OPT4048_XYZ xyz);
+	OPT4048_RGB ConvertXYZtoRGB(OPT4048_XYZ xyz, 
+		const float XYZ_to_RGB[3][3], 
+		const OPT4048_XYZ whitepoint,
+		function<float(float)> CompandingFunc);
+	OPT4048_RGB ConvertXYZtoRGB(OPT4048_XYZ xyz);
 
 	OPT4048_THRESHOLD readLowLimit();
 	OPT4048_THRESHOLD readHighLimit();
@@ -222,13 +238,24 @@ private:
 	OPT4048_RESULT returnResultError(OPT4048_ErrorCode error);
 	OPT4048_THRESHOLD returnThresholdError(OPT4048_ErrorCode error);
 
-	float ADC_to_XYZ[4][4] = { { 2.34892992e-4, -1.89652390e-5,  1.20811684e-5,       0 },
-							          { 4.07467441e-5,  1.98958202e-4, -1.58848115e-5, 2.15e-3 },
-		                              { 9.28619404e-5, -1.69739553e-5,  6.74021520e-4,       0 },
-							          {             0,              0,              0,       0 }
+	// M^-1 for sRGB @ D65 from www.brucelindbloom.com
+	static constexpr float XYZ_to_RGB[3][3] = { {  3.2404542, -1.5371385, -0.4985314 },
+												{ -0.9692660,  1.8760108,  0.0415560 },
+												{  0.0556434, -0.2040259,  1.0572252 }
 	};
 
-};
+	// XYZ of D65 Illuminant
+	static constexpr OPT4048_XYZ D65_Illuminant = { 95.0500, 100.0000, 108.9000, NAN };
 
+	// sRGB Companding function from www.brucelindbloom.com
+	static float sRGBCompandingFunction(float val)
+	{
+		if (val <= 0.0031308)
+			return val *= 12.92;
+		else
+			return pow(1.055 * val, 1 / 2.4) - 0.055;
+	}
+
+};
 
 #endif 

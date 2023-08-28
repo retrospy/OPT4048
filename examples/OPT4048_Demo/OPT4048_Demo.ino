@@ -38,24 +38,37 @@ void setup()
 
 void loop()
 {
-  OPT4048_RESULT result0 = opt4048.readResult(CHANNEL_0);
-  OPT4048_RESULT result1 = opt4048.readResult(CHANNEL_1);
-  OPT4048_RESULT result2 = opt4048.readResult(CHANNEL_2);
-  OPT4048_RESULT result3 = opt4048.readResult(CHANNEL_3);
+   OPT4048_XYZ sensorData;
+  
+  OPT4048_ErrorCode err = opt4048.readXYZ(sensorData);
 
-  printAllChannels("OPT4048", result0, result1, result2, result3);
+  if (err == NO_ERROR)
+  {
+    Serial.print("X=");
+    Serial.print(sensorData.X);
+    Serial.print(" Y=");
+    Serial.print(sensorData.Y);
+    Serial.print(" Z=");
+    Serial.print(sensorData.Z);
+    Serial.print(" Lux=");
+    Serial.println(sensorData.Lux);
+  }
+  else
+  {
+    printError("OPT4048 data", err);
+  }
 }
 
-void configureSensor() {
-
+void configureSensor() 
+{
   OPT4048_ConfigA newConfigA;
-  newConfigA.rawData = 0x3208;  // Default value of the Config A register
   newConfigA.OpMode = 0x03;
-  OPT4048_ErrorCode errorConfig = opt4048.writeConfigA(newConfigA);
+  OPT4048_ErrorCode errorConfig = opt4048.writeConfig(newConfigA);
   if (errorConfig != NO_ERROR)
     printError("OPT4048 configuration", errorConfig);
   else {
-    OPT4048_ConfigA sensorConfig = opt4048.readConfigA();
+    OPT4048_ConfigA sensorConfig;
+    errorConfig = opt4048.readConfig(sensorConfig);
     Serial.println("------------------------------");
     Serial.println("OPT4048 Current Config A:");
     Serial.println("------------------------------");
@@ -85,12 +98,12 @@ void configureSensor() {
   }
 
   OPT4048_ConfigB newConfigB;
-  newConfigB.rawData = 0x8011;  // Default value of the Config B register
-  errorConfig = opt4048.writeConfigB(newConfigB);
+  errorConfig = opt4048.writeConfig(newConfigB);
   if (errorConfig != NO_ERROR)
     printError("OPT4048 configuration", errorConfig);
   else {
-    OPT4048_ConfigB sensorConfigB = opt4048.readConfigB();
+    OPT4048_ConfigB sensorConfigB;
+    errorConfig = opt4048.readConfig(sensorConfigB);
     Serial.println("OPT4048 Current Config B:");
     Serial.println("------------------------------");
 
@@ -107,62 +120,7 @@ void configureSensor() {
     Serial.println(sensorConfigB.ThresholdChannel, HEX);
 
     Serial.println("------------------------------");
-  }
-  
-}
-
-void printResult(String text, OPT4048_RESULT result) {
-  if (result.error == NO_ERROR) {
-    Serial.print(text);
-    Serial.print(": ");
-    Serial.print(result.rawResult.Mantissa);
-    Serial.print(" x 2^");
-    Serial.println(result.rawResult.Exponent);
-  }
-  else {
-    printError(text,result.error);
-  }
-}
-
-void printAllChannels(String text, OPT4048_RESULT result0, OPT4048_RESULT result1, OPT4048_RESULT result2, OPT4048_RESULT result3) {
-  Serial.print(text);
-  Serial.print(": ");
-  if (result0.error == NO_ERROR) {
-    Serial.print(result0.rawResult.Mantissa);
-    Serial.print(" x 2^");
-    Serial.print(result0.rawResult.Exponent);
-    Serial.print(" ");
-  }
-  else {
-    printError(text,result0.error);
-  }
-  if (result1.error == NO_ERROR) {
-    Serial.print(result1.rawResult.Mantissa);
-    Serial.print(" x 2^");
-    Serial.print(result1.rawResult.Exponent);
-    Serial.print(" ");
-  }
-  else {
-    printError(text,result1.error);
-  }
-  if (result2.error == NO_ERROR) {
-    Serial.print(result2.rawResult.Mantissa);
-    Serial.print(" x 2^");
-    Serial.print(result2.rawResult.Exponent);
-    Serial.print(" ");
-  }
-  else {
-    printError(text,result2.error);
-  }
-  if (result3.error == NO_ERROR) {
-    Serial.print(result3.rawResult.Mantissa);
-    Serial.print(" x 2^");
-    Serial.print(result3.rawResult.Exponent);
-    Serial.println();
-  }
-  else {
-    printError(text,result3.error);
-  }
+  } 
 }
 
 void printThreshold(String text, OPT4048_THRESHOLD result) {

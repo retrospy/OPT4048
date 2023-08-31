@@ -32,7 +32,6 @@ THE SOFTWARE.
 #define OPT4048_H
 
 #include <Arduino.h>
-#include <functional>
 
 using namespace std;
 
@@ -134,9 +133,38 @@ struct OPT4048_RESULT
 	OPT4048_ER20 rawResult;
 	OPT4048_ErrorCode error;
 
+	uint8_t Counter;
+	uint8_t CRC;
+
 	float GetADCValue()
 	{
 		return rawResult.Mantissa << rawResult.Exponent;
+	}
+
+	byte CalculateCRC()
+	{
+		byte crc = 0;
+
+		crc = CalculateParity(rawResult.Exponent, 0, 1, 4) ^ CalculateParity(rawResult.Mantissa, 0, 1, 20) ^ CalculateParity(Counter, 0, 1, 4);
+		crc |= ((CalculateParity(rawResult.Exponent, 1, 2, 4) ^ CalculateParity(rawResult.Mantissa, 1, 2, 20) ^ CalculateParity(Counter, 1, 2, 4)) << 1);
+		crc |= ((CalculateParity(rawResult.Exponent, 3, 4, 4) ^ CalculateParity(rawResult.Mantissa, 3, 4, 20) ^ CalculateParity(Counter, 3, 4, 4)) << 2);
+		crc |= (CalculateParity(rawResult.Mantissa, 3, 8, 20) << 3);
+
+		return crc;
+	}
+
+private:
+	byte CalculateParity(int value, int start, int step, byte bytes)
+	{
+		byte result;
+		for(int i = start; i < bytes; i += step)
+		{
+			if (i == start)
+				result = (value & (1 << i)) == 0 ? 0 : 1;
+			else
+				result ^= (value & (1 << i)) == 0 ? 0 : 1;
+		}
+		return result;
 	}
 };
 
@@ -210,7 +238,7 @@ public:
 	OPT4048_RGB ConvertXYZtoRGB(OPT4048_XYZ xyz, 
 		const float XYZ_to_RGB[3][3], 
 		const OPT4048_XYZ whitepoint,
-		function<float(float)> CompandingFunc);
+		float (*CompandingFunc)(float));
 	OPT4048_RGB ConvertXYZtoRGB(OPT4048_XYZ xyz);
 
 	OPT4048_THRESHOLD readLowLimit();

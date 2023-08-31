@@ -65,6 +65,8 @@ OPT4048_RESULT OPT4048::readChannel(OPT4048_Channel channel)
 			OPT4048_RESULT result;
 			result.rawResult.Mantissa = mantissa + (register2.value >> 8);
 			result.rawResult.Exponent = exponent;
+			result.Counter = 0x000F & (register2.value >> 4);
+			result.CRC = 0x000F & register2.value;
 			result.error = NO_ERROR;
 			return result;
 		}
@@ -228,7 +230,7 @@ OPT4048_CIE OPT4048::ConvertXYZtoCIE(OPT4048_XYZ xyz)
 	return retval;
 }
 
-OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz, const float XYZ_to_RGB[3][3], const OPT4048_XYZ whitepoint, function<float(float)> CompandingFunc)
+OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz, const float XYZ_to_RGB[3][3], const OPT4048_XYZ whitepoint, float (*CompandingFunc)(float))
 {
 	OPT4048_RGB retval;
 
@@ -237,9 +239,9 @@ OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz, const float XYZ_to_RGB[3][
 	xyz.Y /= whitepoint.Y;
 	xyz.Z /= whitepoint.Y;
 
-	retval.R = min(1.0, max(0.0, CompandingFunc(xyz.X * XYZ_to_RGB[0][0] + xyz.Y * XYZ_to_RGB[0][1] + xyz.Z * XYZ_to_RGB[0][2])));
-	retval.G = min(1.0, max(0.0, CompandingFunc(xyz.X * XYZ_to_RGB[1][0] + xyz.Y * XYZ_to_RGB[1][1] + xyz.Z * XYZ_to_RGB[1][2])));
-	retval.B = min(1.0, max(0.0, CompandingFunc(xyz.X * XYZ_to_RGB[2][0] + xyz.Y * XYZ_to_RGB[2][1] + xyz.Z * XYZ_to_RGB[2][2])));
+	retval.R = min(1.0, max(0.0, (*CompandingFunc)(xyz.X * XYZ_to_RGB[0][0] + xyz.Y * XYZ_to_RGB[0][1] + xyz.Z * XYZ_to_RGB[0][2])));
+	retval.G = min(1.0, max(0.0, (*CompandingFunc)(xyz.X * XYZ_to_RGB[1][0] + xyz.Y * XYZ_to_RGB[1][1] + xyz.Z * XYZ_to_RGB[1][2])));
+	retval.B = min(1.0, max(0.0, (*CompandingFunc)(xyz.X * XYZ_to_RGB[2][0] + xyz.Y * XYZ_to_RGB[2][1] + xyz.Z * XYZ_to_RGB[2][2])));
 
 	return retval;
 }

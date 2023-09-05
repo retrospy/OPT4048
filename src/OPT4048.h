@@ -154,15 +154,15 @@ struct OPT4048_RESULT
 	}
 
 private:
-	byte CalculateParity(int value, int start, int step, byte bytes)
-	{
-		byte result;
-		for(int i = start; i < bytes; i += step)
-		{
-			if (i == start)
-				result = (value & (1 << i)) == 0 ? 0 : 1;
-			else
-				result ^= (value & (1 << i)) == 0 ? 0 : 1;
+	int CalculateParity(uint32_t value, int start, int step, int bytes) {
+		int result;
+		for (int i = start; i < bytes; i += step) {
+			if (i == start) {
+				result = (value >> i) & 1;
+			}
+			else {
+				result ^= (value >> i) & 1;
+			}
 		}
 		return result;
 	}

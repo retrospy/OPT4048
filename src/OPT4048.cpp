@@ -239,9 +239,9 @@ OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz, const float XYZ_to_RGB[3][
 	xyz.Y /= whitepoint.Y;
 	xyz.Z /= whitepoint.Y;
 
-	retval.R = min(1.0, max(0.0, (*CompandingFunc)(xyz.X * XYZ_to_RGB[0][0] + xyz.Y * XYZ_to_RGB[0][1] + xyz.Z * XYZ_to_RGB[0][2])));
-	retval.G = min(1.0, max(0.0, (*CompandingFunc)(xyz.X * XYZ_to_RGB[1][0] + xyz.Y * XYZ_to_RGB[1][1] + xyz.Z * XYZ_to_RGB[1][2])));
-	retval.B = min(1.0, max(0.0, (*CompandingFunc)(xyz.X * XYZ_to_RGB[2][0] + xyz.Y * XYZ_to_RGB[2][1] + xyz.Z * XYZ_to_RGB[2][2])));
+	retval.R = min(1.0f, max(0.0f, (*CompandingFunc)(xyz.X * XYZ_to_RGB[0][0] + xyz.Y * XYZ_to_RGB[0][1] + xyz.Z * XYZ_to_RGB[0][2])));
+	retval.G = min(1.0f, max(0.0f, (*CompandingFunc)(xyz.X * XYZ_to_RGB[1][0] + xyz.Y * XYZ_to_RGB[1][1] + xyz.Z * XYZ_to_RGB[1][2])));
+	retval.B = min(1.0f, max(0.0f, (*CompandingFunc)(xyz.X * XYZ_to_RGB[2][0] + xyz.Y * XYZ_to_RGB[2][1] + xyz.Z * XYZ_to_RGB[2][2])));
 
 	return retval;
 }

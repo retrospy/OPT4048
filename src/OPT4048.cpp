@@ -246,10 +246,26 @@ OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz, const float XYZ_to_RGB[3][
 	return retval;
 }
 
+#if defined(CORE_TEENSY)
+// M^-1 for sRGB @ D65 from www.brucelindbloom.com
+static float _XYZ_to_RGB[3][3] = { {  3.2404542, -1.5371385, -0.4985314 },
+											{ -0.9692660,  1.8760108,  0.0415560 },
+											{  0.0556434, -0.2040259,  1.0572252 }
+};
+
+// XYZ of D65 Illuminant
+static OPT4048_XYZ _D65_Illuminant = { 95.0500, 100.0000, 108.9000, NAN };
+	
+OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz)
+{
+	return ConvertXYZtoRGB(xyz, _XYZ_to_RGB, _D65_Illuminant, &OPT4048::sRGBCompandingFunction);
+}
+#else
 OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz)
 {
 	return ConvertXYZtoRGB(xyz, OPT4048::XYZ_to_RGB, OPT4048::D65_Illuminant, &OPT4048::sRGBCompandingFunction);
 }
+#endif
 
 OPT4048_THRESHOLD OPT4048::readLowLimit()
 {

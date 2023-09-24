@@ -35,7 +35,7 @@ OPT4048::OPT4048()
 {
 }
 
-OPT4048_ErrorCode OPT4048::begin(uint8_t address) 
+OPT4048_ErrorCode OPT4048::begin(byte address) 
 {
 	_address = address;
 	Wire.begin();
@@ -43,9 +43,9 @@ OPT4048_ErrorCode OPT4048::begin(uint8_t address)
 	return NO_ERROR;
 }
 
-uint16_t OPT4048::readDeviceID() 
+unsigned short int OPT4048::readDeviceID() 
 {
-	uint16_t result = 0;
+	unsigned short int result = 0;
 	OPT4048_ErrorCode error = writeData(DEVICE_ID);
 	if (error == NO_ERROR)
 		error = readData(&result);
@@ -57,13 +57,15 @@ OPT4048_RESULT OPT4048::readChannel(OPT4048_Channel channel)
 	OPT4048_THRESHOLD register1 = readLimit((OPT4048_Commands)channel);
 	if (register1.error == NO_ERROR)
 	{
-		uint8_t exponent = register1.rawResult.Exponent;
-		uint32_t mantissa = register1.rawResult.Mantissa << 8;
+		byte exponent = register1.rawResult.Exponent;
+		// This is written this way because on the Uno/Nano right shifting alone 
+		// would sometimes cause the upper 2 bytes of the mantissa to fill with 1s, instead of 0s.
+		unsigned long int mantissa = ((unsigned long int)register1.rawResult.Mantissa | 0L) << 8;
 		OPT4048_REGISTER register2 = readRegister((OPT4048_Commands)(channel + 1));
 		if (register2.error == NO_ERROR)
 		{
 			OPT4048_RESULT result;
-			result.rawResult.Mantissa = mantissa + (register2.value >> 8);
+			result.rawResult.Mantissa = mantissa | (register2.value >> 8);
 			result.rawResult.Exponent = exponent;
 			result.Counter = 0x000F & (register2.value >> 4);
 			result.CRC = 0x000F & register2.value;
@@ -332,11 +334,11 @@ OPT4048_ErrorCode OPT4048::writeData(OPT4048_Commands command)
 	return (OPT4048_ErrorCode)(-10 * Wire.endTransmission(true));
 }
 
-OPT4048_ErrorCode OPT4048::readData(uint16_t* data)
+OPT4048_ErrorCode OPT4048::readData(unsigned short int* data)
 {
-	uint8_t	buf[2];
+	byte buf[2];
 
-	Wire.requestFrom(_address, (uint8_t)2);
+	Wire.requestFrom(_address, (byte)2);
 
 	int counter = 0;
 	while (Wire.available() < 2)

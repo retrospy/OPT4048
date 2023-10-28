@@ -248,6 +248,39 @@ OPT4048_RGB OPT4048::ConvertXYZtoRGB(OPT4048_XYZ xyz, const float XYZ_to_RGB[3][
 	return retval;
 }
 
+OPT4048_LAB OPT4048::ConvertXYZtoLAB(OPT4048_XYZ xyz)
+{	// based on https://gist.github.com/avisek/eadfbe7a7a169b1001a2d3affc21052e
+	// this assumes D65 2° whitepoint
+	float x = xyz.X / 95.047;  // D65 10° 94.811
+	float y = xyz.Y / 100.0;   // D65 10° 100
+	float z = xyz.Z / 108.883; // D65 10° 107.304
+
+	if (x > 0.008856) {
+		x = pow(x, 0.333333333);
+	}
+	else {
+		x = (7.787 * x) + 0.137931034;
+	}
+
+	if (y > 0.008856) {
+		y = pow(y, 0.333333333);
+	}
+	else {
+		y = (7.787 * y) + 0.137931034;
+	}
+
+	if (z > 0.008856) {
+		z = pow(z, 0.333333333);
+}
+	else {
+		z = (7.787 * z) + 0.137931034;
+	}
+
+	OPT4048_LAB labOut = { (116 * y) - 16, 500 * (x - y), 200 * (y - z) };
+
+	return labOut;
+}
+
 #if defined(CORE_TEENSY)
 // M^-1 for sRGB @ D65 from www.brucelindbloom.com
 static float _XYZ_to_RGB[3][3] = { {  3.2404542, -1.5371385, -0.4985314 },

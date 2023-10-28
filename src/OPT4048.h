@@ -212,7 +212,12 @@ struct OPT4048_RGB
 	float B;
 };
 
-
+struct OPT4048_LAB
+{
+	float L;
+	float A;
+	float B;
+};
 
 class OPT4048 {
 public:
@@ -240,6 +245,7 @@ public:
 		const OPT4048_XYZ whitepoint,
 		float (*CompandingFunc)(float));
 	OPT4048_RGB ConvertXYZtoRGB(OPT4048_XYZ xyz);
+	OPT4048_LAB ConvertXYZtoLAB(OPT4048_XYZ xyz);
 
 	OPT4048_THRESHOLD readLowLimit();
 	OPT4048_THRESHOLD readHighLimit();

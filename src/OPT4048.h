@@ -75,14 +75,14 @@ enum OPT4048_Channel
 union OPT4048_ConfigA
 {
 	struct __attribute__((__packed__)) {
-		byte FaultCount		: 2;
-		byte Polarity		: 1;
-		byte Latch			: 1;
-		byte OpMode			: 2;
-		byte ConversionTime  : 4;
-		byte RangeNumber		: 4;
-		byte FixedZero		: 1;
-		byte QuickWake		: 1;
+		uint8_t FaultCount		: 2;
+		uint8_t Polarity		: 1;
+		uint8_t Latch			: 1;
+		uint8_t OpMode			: 2;
+		uint8_t ConversionTime  : 4;
+		uint8_t RangeNumber		: 4;
+		uint8_t FixedZero		: 1;
+		uint8_t QuickWake		: 1;
 	};
 	unsigned short int rawData;
 
@@ -96,12 +96,12 @@ union OPT4048_ConfigA
  {
 	struct __attribute__((__packed__))
 	{
-		byte I2CBurst		 : 1;
-		byte FixedZero		 : 1;
-		byte IntConfig		 : 2;
-		byte IntDirection	 : 1;
-		byte ThresholdChannel : 2;
-		byte RangeNumber		 : 4;
+		uint8_t I2CBurst		 : 1;
+		uint8_t FixedZero		 : 1;
+		uint8_t IntConfig		 : 2;
+		uint8_t IntDirection	 : 1;
+		uint8_t ThresholdChannel : 2;
+		uint8_t RangeNumber		 : 4;
 		unsigned short int Fixed128		 : 9;
 	};
 	unsigned short int rawData;
@@ -115,7 +115,7 @@ union OPT4048_ConfigA
  struct OPT4048_ER20
  {
 	 unsigned long int Mantissa;
-	 byte Exponent;
+	 uint8_t Exponent;
  };
 
 
@@ -123,7 +123,7 @@ union OPT4048_ER12
 {
 	struct __attribute__((__packed__)) {
 		unsigned long int Mantissa : 12;
-		byte Exponent : 4;
+		uint8_t Exponent : 4;
 	};
 	unsigned short int rawData;
 };
@@ -133,17 +133,17 @@ struct OPT4048_RESULT
 	OPT4048_ER20 rawResult;
 	OPT4048_ErrorCode error;
 
-	byte Counter;
-	byte CRC;
+	uint8_t Counter;
+	uint8_t CRC;
 
 	float GetADCValue()
 	{
 		return rawResult.Mantissa << rawResult.Exponent;
 	}
 
-	byte CalculateCRC()
+	uint8_t CalculateCRC()
 	{
-		byte crc = 0;
+		uint8_t crc = 0;
 
 		crc = CalculateParity(rawResult.Exponent, 0, 1, 4) ^ CalculateParity(rawResult.Mantissa, 0, 1, 20) ^ CalculateParity(Counter, 0, 1, 4);
 		crc |= ((CalculateParity(rawResult.Exponent, 1, 2, 4) ^ CalculateParity(rawResult.Mantissa, 1, 2, 20) ^ CalculateParity(Counter, 1, 2, 4)) << 1);
@@ -223,7 +223,7 @@ class OPT4048 {
 public:
 	OPT4048();
 
-	OPT4048_ErrorCode begin(byte address);
+	OPT4048_ErrorCode begin(uint8_t address);
 
 	unsigned short int readDeviceID();
 
@@ -260,7 +260,7 @@ public:
 	OPT4048_ErrorCode writeConfig(OPT4048_ConfigB config);
 
 private:
-	byte _address;
+	uint8_t _address;
 
 	OPT4048_ErrorCode writeData(OPT4048_Commands command);
 	OPT4048_ErrorCode readData(unsigned short int* data);

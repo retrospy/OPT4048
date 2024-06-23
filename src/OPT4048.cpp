@@ -35,7 +35,7 @@ OPT4048::OPT4048()
 {
 }
 
-OPT4048_ErrorCode OPT4048::begin(byte address) 
+OPT4048_ErrorCode OPT4048::begin(uint8_t address) 
 {
 	_address = address;
 	Wire.begin();
@@ -57,7 +57,7 @@ OPT4048_RESULT OPT4048::readChannel(OPT4048_Channel channel)
 	OPT4048_THRESHOLD register1 = readLimit((OPT4048_Commands)channel);
 	if (register1.error == NO_ERROR)
 	{
-		byte exponent = register1.rawResult.Exponent;
+		uint8_t exponent = register1.rawResult.Exponent;
 		// This is written this way because on the Uno/Nano right shifting alone 
 		// would sometimes cause the upper 2 bytes of the mantissa to fill with 1s, instead of 0s.
 		unsigned long int mantissa = ((unsigned long int)register1.rawResult.Mantissa | 0L) << 8;
@@ -281,7 +281,7 @@ OPT4048_LAB OPT4048::ConvertXYZtoLAB(OPT4048_XYZ xyz)
 	return labOut;
 }
 
-#if defined(CORE_TEENSY)
+#if defined(CORE_TEENSY) || defined(ARDUINO_ARCH_RP2040)
 // M^-1 for sRGB @ D65 from www.brucelindbloom.com
 static float _XYZ_to_RGB[3][3] = { {  3.2404542, -1.5371385, -0.4985314 },
 											{ -0.9692660,  1.8760108,  0.0415560 },
@@ -369,9 +369,9 @@ OPT4048_ErrorCode OPT4048::writeData(OPT4048_Commands command)
 
 OPT4048_ErrorCode OPT4048::readData(unsigned short int* data)
 {
-	byte buf[2];
+	uint8_t buf[2];
 
-	Wire.requestFrom(_address, (byte)2);
+	Wire.requestFrom(_address, (uint8_t)2);
 
 	int counter = 0;
 	while (Wire.available() < 2)
